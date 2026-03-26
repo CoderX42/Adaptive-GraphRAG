@@ -98,7 +98,7 @@ ollama pull nomic-embed-text
 ## 快速开始
 
 ```bash
-git clone https://github.com/<你的用户名>/Adaptive-GraphRAG.git
+git clone https://github.com/CoderX42/Adaptive-GraphRAG.git
 cd Adaptive-GraphRAG
 
 python3 -m venv .venv
@@ -183,6 +183,4 @@ pytest tests/ -q          # 若有测试目录
 
 思路参考传统 RAG 与 GraphRAG 结合、多路召回与融合等实践；嵌入与对话由 [Ollama](https://ollama.com/) 提供。
 
-## License
 
-MIT（若仓库未含 `LICENSE` 文件，可自行添加 MIT 全文。）
