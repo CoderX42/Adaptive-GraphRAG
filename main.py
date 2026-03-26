@@ -7,7 +7,8 @@ from typing import Any
 import gradio as gr
 import uvicorn
 from fastapi import FastAPI, File, HTTPException, Query, UploadFile
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
+from fastapi.staticfiles import StaticFiles
 from loguru import logger
 
 from config import settings
@@ -261,6 +262,13 @@ def _handle_list_doc_ids() -> list[str]:
     ]
 
 
+# ── Vue SPA (production build) ──
+
+@api.get("/")
+async def root_redirect() -> RedirectResponse:
+    return RedirectResponse(url="/app/", status_code=307)
+
+
 # ── Mount Gradio ──
 
 from ui.app import create_ui
@@ -274,7 +282,16 @@ gradio_app = create_ui(
 )
 api = gr.mount_gradio_app(api, gradio_app, path="/ui")
 
+_frontend_dist = Path(__file__).resolve().parent / "frontend" / "dist"
+if _frontend_dist.is_dir():
+    api.mount(
+        "/app",
+        StaticFiles(directory=str(_frontend_dist), html=True),
+        name="vue_app",
+    )
+
 if __name__ == "__main__":
     logger.info("Starting Adaptive-GraphRAG server on http://localhost:8000")
+    logger.info("Vue UI: http://localhost:8000/app/ (after npm run build in frontend/)")
     logger.info("Gradio UI: http://localhost:8000/ui")
     uvicorn.run("main:api", host="0.0.0.0", port=8000, reload=True)

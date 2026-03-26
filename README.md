@@ -22,17 +22,17 @@
 | 自适应检索 | 规则引擎识别问题类型，自动选择 `vector` / `graph` / `hybrid`，也可在界面手动指定 |
 | 轻量 GraphRAG | 使用 Ollama 从文本块抽取实体与关系，NetworkX 存图并支持最短路径与邻域检索 |
 | 向量检索 | ChromaDB 持久化 + Ollama 嵌入模型（如 `nomic-embed-text`） |
-| Web 界面 | Gradio：文档管理、智能问答、知识图谱可视化 |
-| REST API | FastAPI 提供上传、查询、图谱统计等接口 |
+| Web 界面 | **Vue 3**（`/app/`）与 **Gradio**（`/ui`）并存：文档管理、智能问答、知识图谱（Cytoscape） |
+| REST API | FastAPI 提供上传、查询、图谱统计等接口（Vue 与 Gradio 共用） |
 
 ## 技术栈
 
-`FastAPI` · `Gradio` · `ChromaDB` · `NetworkX` · `PyMuPDF` · `Ollama` · `Pydantic`
+`FastAPI` · `Vue 3` · `Vite` · `Gradio` · `ChromaDB` · `NetworkX` · `PyMuPDF` · `Ollama` · `Pydantic`
 
 ## 系统架构
 
 ```text
-用户 (Gradio / HTTP API)
+用户 (Vue / Gradio / HTTP API)
         │
         ▼
    FastAPI 应用
@@ -111,8 +111,26 @@ cp .env.example .env        # 按需修改模型名与路径
 python main.py
 ```
 
+- **Vue 界面（生产）**：先在前端目录执行 `npm run build`，再启动后端；访问 <http://localhost:8000/>（会重定向到 <http://localhost:8000/app/>）
+- **Vue 开发模式**：见下文 [前端开发（Vue）](#前端开发vue)
 - **Gradio 界面**：<http://localhost:8000/ui>
 - **OpenAPI 文档**：<http://localhost:8000/docs>
+
+### 前端开发（Vue）
+
+前端源码在 `frontend/`（Vite + Vue 3 + TypeScript）。开发时建议**两个终端**：后端 `python main.py`（默认 `8000`），前端 `cd frontend && npm install && npm run dev`（默认 Vite `5173`）。`vite.config.ts` 已将 `/api` 代理到 `http://127.0.0.1:8000`，避免跨域。
+
+开发地址请使用 **<http://localhost:5173/app/>**（与生产路径 `/app` 一致）。直接打开 `http://localhost:5173/` 会 302 跳到 `/app/`；`npm run dev` 也会尝试自动打开该路径。若页面空白或接口报错，请先确认后端已在 `8000` 端口运行。
+
+生产环境由 FastAPI 挂载 `frontend/dist` 到路径 **`/app`**（`base: '/app/'`），与 Gradio 的 `/ui` 可并存。
+
+```bash
+cd frontend
+npm install
+npm run build    # 产出 dist/，供 FastAPI StaticFiles 使用
+```
+
+若希望单命令并行启动，可在本机安装 [concurrently](https://www.npmjs.com/package/concurrently) 后自行组合，例如：`concurrently "python main.py" "cd frontend && npm run dev"`（需在项目根目录、已激活 Python 虚拟环境）。
 
 ## 配置说明
 
@@ -147,7 +165,8 @@ python main.py
 
 ```text
 Adaptive-GraphRAG/
-├── main.py                 # FastAPI 入口 + Gradio 挂载
+├── main.py                 # FastAPI 入口 + Gradio /ui + Vue 静态资源 /app
+├── frontend/               # Vue 3 + Vite（npm run dev / npm run build）
 ├── config.py               # 配置（Pydantic Settings）
 ├── requirements.txt
 ├── .env.example
@@ -178,6 +197,8 @@ Adaptive-GraphRAG/
 source .venv/bin/activate
 pytest tests/ -q          # 若有测试目录
 ```
+
+前端日常开发：见 [前端开发（Vue）](#前端开发vue)；访问 Vite 开发服务器（一般为 <http://localhost:5173/app/>，具体以终端输出为准）。
 
 ## 致谢
 
