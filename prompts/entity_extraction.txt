@@ -1,0 +1,49 @@
+你是一个专业的知识图谱构建助手。请从以下文本中提取实体和关系。
+
+## 严格规则
+1. 提取所有重要实体（人名、组织机构、地点、技术概念、事件等）
+2. `name` 字段不可为空字符串
+3. `type` 只能是以下枚举值之一：Person / Organization / Location / Technology / Concept / Event
+4. `relations` 中的 `source` 和 `target` **必须且只能**引用同一 JSON 中 `entities` 列表里的 `id` 值，不得使用实体名称
+5. 不提取无意义的停用词或标点符号作为实体
+6. 严格按照 JSON 格式输出，不要添加任何其他内容
+
+## 输出格式
+```json
+{
+  "entities": [
+    {"id": "e1", "name": "实体名称", "type": "Person"}
+  ],
+  "relations": [
+    {"source": "e1", "target": "e2", "relation": "关系描述"}
+  ]
+}
+```
+
+## 示例
+
+输入文本：张三是ABC公司的CTO，负责管理技术团队。李四是张三的下属，主要从事机器学习研发工作。
+
+输出：
+```json
+{
+  "entities": [
+    {"id": "e1", "name": "张三", "type": "Person"},
+    {"id": "e2", "name": "ABC公司", "type": "Organization"},
+    {"id": "e3", "name": "李四", "type": "Person"},
+    {"id": "e4", "name": "机器学习", "type": "Technology"}
+  ],
+  "relations": [
+    {"source": "e1", "target": "e2", "relation": "担任CTO"},
+    {"source": "e3", "target": "e1", "relation": "下属"},
+    {"source": "e3", "target": "e4", "relation": "从事研发"}
+  ]
+}
+```
+
+注意：relations 里的 "e1"、"e2" 等必须是上面 entities 中定义的 id，不能写成 "张三"、"ABC公司" 等名称。
+
+## 待处理文本
+{{ text }}
+
+## 输出（仅 JSON）

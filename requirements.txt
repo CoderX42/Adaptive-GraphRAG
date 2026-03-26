@@ -1,0 +1,28 @@
+# Web
+fastapi
+uvicorn[standard]
+gradio
+python-multipart
+
+# AI/ML
+ollama
+chromadb
+
+# Data/Graph
+networkx
+numpy
+
+# Document Processing
+pymupdf
+
+# Utils
+pydantic
+pydantic-settings
+python-dotenv
+loguru
+tqdm
+jinja2
+
+# Dev
+pytest
+pytest-asyncio
